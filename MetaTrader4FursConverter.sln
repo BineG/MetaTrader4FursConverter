@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32819.101
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MetaTrader4FursConverter", "MetaTrader4FursConverter\MetaTrader4FursConverter.csproj", "{CCFA298D-C2AF-421E-97EE-512643B2BF7E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MetaTraderConversionLib", "MetaTraderConversionLib\MetaTraderConversionLib.csproj", "{773DCB48-1993-403D-A8EE-9BCFD6B3C286}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CCFA298D-C2AF-421E-97EE-512643B2BF7E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CCFA298D-C2AF-421E-97EE-512643B2BF7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CCFA298D-C2AF-421E-97EE-512643B2BF7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CCFA298D-C2AF-421E-97EE-512643B2BF7E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{773DCB48-1993-403D-A8EE-9BCFD6B3C286}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{773DCB48-1993-403D-A8EE-9BCFD6B3C286}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{773DCB48-1993-403D-A8EE-9BCFD6B3C286}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{773DCB48-1993-403D-A8EE-9BCFD6B3C286}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C29075F5-A599-4A53-B0D1-41FA9D237A59}
+	EndGlobalSection
+EndGlobal
