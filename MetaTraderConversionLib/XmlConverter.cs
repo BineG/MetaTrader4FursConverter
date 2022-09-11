@@ -73,124 +73,148 @@ namespace MetaTraderConversionLib
                 });
             }
 
-            var assetGroups = transactions.GroupBy(x => x.AssetName).ToList();
 
-            Envelope rootDoc = new Envelope()
-            {
-                Header = new Header
-                {
-                    taxpayer = new taxPayerType()
-                    {
-                        taxpayerType = taxpayerTypeType.FO,
-                        taxpayerTypeSpecified = true,
-                        address1 = _info.PersonInfo.Address1,
-                        city = _info.PersonInfo.City,
-                        postNumber = _info.PersonInfo.PostNumber,
-                        birthDate = _info.PersonInfo.Birthdate,
-                        birthDateSpecified = true,
-                        name = _info.PersonInfo.NameSurname,
-                        ItemElementName = ItemChoiceType.taxNumber,
-                        Item = _info.PersonInfo.TaxNumber
-                    }
-                },
-                body = new EnvelopeBody()
-                {
-                    bodyContent = new object(),
-                    Doh_KDVP = new Doh_KDVP()
-                    {
-                        KDVP = new Doh_KDVPKDVP()
-                        {
-                            DocumentWorkflowID = _info.DocumentInfo.DocumentType,
-                            Year = 2020,
-                            YearSpecified = true,
-                            PeriodStart = new DateTime(2020, 1, 1),
-                            PeriodStartSpecified = true,
-                            PeriodEnd = new DateTime(2020, 12, 31),
-                            PeriodEndSpecified = true,
-                            IsResident = true,
-                            IsResidentSpecified = true,
-                            TelephoneNumber = _info.PersonInfo.Telephone,
-                            Email = _info.PersonInfo.Email,
-                            // stevilo razlicnih trgovalnih papirjev
-                            SecurityCount = assetGroups.Count
-                        },
-                        KDVPItem = assetGroups.Select((g, index) =>
-                        {
-                            List<SecuritiesRow> securitiesRows = new();
-                            int id = 0;
-                            for (int entryIndex = 0; entryIndex < g.Count(); entryIndex++)
-                            {
-                                var entry = g.ElementAt(entryIndex);
+            //var assetGroups = transactions.GroupBy(x => new { x.AssetName, SellYear = x.SellTime.Year }).ToList();
 
-                                securitiesRows.Add(new SecuritiesRow()
-                                {
-                                    ID = id++,
-                                    Item = new SecuritiesRowPurchase()
-                                    {
-                                        F1 = entry.BuyTime,
-                                        F1Specified = true,
-                                        F2 = typeGainType.A,
-                                        F2Specified = true,
-                                        F3 = entry.Amount,
-                                        F3Specified = true,
-                                        F4 = entry.BuyPrice,
-                                        F4Specified = true,
-                                    },
-                                    F8 = entry.Amount,
-                                    F8Specified = true
-                                });
-                                securitiesRows.Add(new SecuritiesRow()
-                                {
-                                    ID = id++,
-                                    Item = new SecuritiesRowSale()
-                                    {
-                                        F6 = entry.SellTime,
-                                        F6Specified = true,
-                                        F7 = entry.Amount,
-                                        F7Specified = true,
-                                        F9 = entry.SellPrice,
-                                        F9Specified = true,
-                                        F10 = true,
-                                        F10Specified = true
-                                    },
-                                    F8 = 0,
-                                    F8Specified = true
-                                });
-                            }
-
-                            return new Doh_KDVPKDVPItem()
-                            {
-                                ItemID = index + 1,
-                                ItemIDSpecified = true,
-                                InventoryListType = typeInventory.PLVP,
-                                HasForeignTax = false,
-                                HasForeignTaxSpecified = true,
-                                HasLossTransfer = false,
-                                HasLossTransferSpecified = true,
-                                ForeignTransfer = false,
-                                ForeignTransferSpecified = true,
-                                TaxDecreaseConformance = false,
-                                TaxDecreaseConformanceSpecified = true,
-                                Name = g.Key,
-                                Item = new Securities()
-                                {
-                                    Name = g.Key,
-                                    IsFond = false,
-                                    Row = securitiesRows.ToArray()
-                                }
-                            };
-                        })
-                        .ToArray()
-                    }
-                },
-                Signatures = new Signatures(),
-                AttachmentList = new AttachmentListExternalAttachment[0]
-            };
+            List<int> years = transactions
+                .Select(x => x.SellTime.Year)
+                .Distinct()
+                .OrderBy(x => x)
+                .ToList();
 
             XmlSerializer serializer = new XmlSerializer(typeof(Envelope));
-            TextWriter writer = new StreamWriter(targetFile);
-            serializer.Serialize(writer, rootDoc);
-            writer.Close();
+
+            foreach (int currentYear in years)
+            {
+                var assetGroups = transactions
+                    .Where(x => x.SellTime.Year == currentYear)
+                    .GroupBy(x => new { x.AssetName })
+                    .ToList();
+
+                Envelope rootDoc = new Envelope()
+                {
+                    Header = new Header
+                    {
+                        taxpayer = new taxPayerType()
+                        {
+                            taxpayerType = taxpayerTypeType.FO,
+                            taxpayerTypeSpecified = true,
+                            address1 = _info.PersonInfo.Address1,
+                            city = _info.PersonInfo.City,
+                            postNumber = _info.PersonInfo.PostNumber,
+                            birthDate = _info.PersonInfo.Birthdate,
+                            birthDateSpecified = true,
+                            name = _info.PersonInfo.NameSurname,
+                            ItemElementName = ItemChoiceType.taxNumber,
+                            Item = _info.PersonInfo.TaxNumber
+                        }
+                    },
+                    body = new EnvelopeBody()
+                    {
+                        bodyContent = new object(),
+                        Doh_KDVP = new Doh_KDVP()
+                        {
+                            KDVP = new Doh_KDVPKDVP()
+                            {
+                                DocumentWorkflowID = _info.DocumentInfo.DocumentType,
+                                Year = currentYear,
+                                YearSpecified = true,
+                                PeriodStart = new DateTime(currentYear, 1, 1),
+                                PeriodStartSpecified = true,
+                                PeriodEnd = new DateTime(currentYear, 12, 31),
+                                PeriodEndSpecified = true,
+                                IsResident = true,
+                                IsResidentSpecified = true,
+                                TelephoneNumber = _info.PersonInfo.Telephone,
+                                Email = _info.PersonInfo.Email,
+                                // stevilo razlicnih trgovalnih papirjev
+                                SecurityCount = assetGroups.Count
+                            },
+                            KDVPItem = assetGroups.Select((g, index) =>
+                            {
+                                List<SecuritiesRow> securitiesRows = new();
+                                int id = 0;
+                                for (int entryIndex = 0; entryIndex < g.Count(); entryIndex++)
+                                {
+                                    var entry = g.ElementAt(entryIndex);
+
+                                    securitiesRows.Add(new SecuritiesRow()
+                                    {
+                                        ID = id++,
+                                        Item = new SecuritiesRowPurchase()
+                                        {
+                                            F1 = entry.BuyTime,
+                                            F1Specified = true,
+                                            F2 = typeGainType.A,
+                                            F2Specified = true,
+                                            F3 = entry.Amount,
+                                            F3Specified = true,
+                                            F4 = entry.BuyPrice,
+                                            F4Specified = true,
+                                        },
+                                        F8 = entry.Amount,
+                                        F8Specified = true
+                                    });
+                                    securitiesRows.Add(new SecuritiesRow()
+                                    {
+                                        ID = id++,
+                                        Item = new SecuritiesRowSale()
+                                        {
+                                            F6 = entry.SellTime,
+                                            F6Specified = true,
+                                            F7 = entry.Amount,
+                                            F7Specified = true,
+                                            F9 = entry.SellPrice,
+                                            F9Specified = true,
+                                            F10 = true,
+                                            F10Specified = true
+                                        },
+                                        F8 = 0,
+                                        F8Specified = true
+                                    });
+                                }
+
+                                return new Doh_KDVPKDVPItem()
+                                {
+                                    ItemID = index + 1,
+                                    ItemIDSpecified = true,
+                                    InventoryListType = typeInventory.PLVP,
+                                    HasForeignTax = false,
+                                    HasForeignTaxSpecified = true,
+                                    HasLossTransfer = false,
+                                    HasLossTransferSpecified = true,
+                                    ForeignTransfer = false,
+                                    ForeignTransferSpecified = true,
+                                    TaxDecreaseConformance = false,
+                                    TaxDecreaseConformanceSpecified = true,
+                                    Name = g.Key.AssetName,
+                                    Item = new Securities()
+                                    {
+                                        Name = g.Key.AssetName,
+                                        IsFond = false,
+                                        Row = securitiesRows.ToArray()
+                                    }
+                                };
+                            })
+                        .ToArray()
+                        }
+                    },
+                    Signatures = new Signatures(),
+                    AttachmentList = new AttachmentListExternalAttachment[0]
+                };
+
+                int dotIndex = targetFile.LastIndexOf('.');
+                string yearTargetFile = $"{targetFile}-{currentYear}.xml";
+                if (dotIndex > -1)
+                {
+                    yearTargetFile = $"{yearTargetFile[..dotIndex]}-{currentYear}.xml";
+                }
+
+                using TextWriter writer = new StreamWriter(yearTargetFile);
+                serializer.Serialize(writer, rootDoc);
+
+                writer.Close();
+            }
         }
 
         private DateTime ParseTime(XmlNode cell)
