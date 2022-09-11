@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Xml\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Update="ReportHistory-543742.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

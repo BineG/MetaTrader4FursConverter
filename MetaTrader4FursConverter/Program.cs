@@ -13,4 +13,4 @@ ConversionInfoDto conversionInfo = config.GetSection("ConversionInfo").Get<Conve
 
 XmlConverter converter = new XmlConverter(conversionInfo);
 
-converter.Convert("ReportHistory-543742.xml", "edavki.xml");
+converter.Convert("ReportHistory-543742.xml", "edavki");
